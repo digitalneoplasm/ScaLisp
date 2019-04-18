@@ -85,6 +85,10 @@ case class Symbol(name: String) extends Form {
 case class LispInteger(value: Integer) extends Form {
   override def toString() = value.toString
   override def eval(env:Environment): Form = return this // Integers evaluate to themselves.
+  def +(other: LispInteger) = LispInteger(value + other.value)
+  def -(other: LispInteger) = LispInteger(value - other.value)
+  def *(other: LispInteger) = LispInteger(value * other.value)
+  def /(other: LispInteger) = LispInteger(value / other.value)
 }
 case class LispList(args: List[Form]) extends Form {
   override def toString() = "(" + args.mkString(" ") + ")"
@@ -107,6 +111,8 @@ case class LispList(args: List[Form]) extends Form {
           case _ => throw new Exception("eq is defined only for symbols.")
         }
       }
+
+      // List operations
       case List(Symbol("car"), f:Form) => {
         val evaled = f.eval(env)
         evaled match {
@@ -129,6 +135,21 @@ case class LispList(args: List[Form]) extends Form {
           case _ => throw new Exception("cons requires a form and list.")
         }
       }
+
+      // Math operations
+      case Symbol("+") :: operands => {
+        operands.map(o => o.eval(env)).asInstanceOf[List[LispInteger]].reduce((a,b) => a + b)
+      }
+      case Symbol("-") :: operands => {
+        operands.map(o => o.eval(env)).asInstanceOf[List[LispInteger]].reduce((a,b) => a - b)
+      }
+      case Symbol("*") :: operands => {
+        operands.map(o => o.eval(env)).asInstanceOf[List[LispInteger]].reduce((a,b) => a * b)
+      }
+      case Symbol("/") :: operands => {
+        operands.map(o => o.eval(env)).asInstanceOf[List[LispInteger]].reduce((a,b) => a / b)
+      }
+
       case List(Symbol("quote"), f:Form) => f
 
       case List(Symbol("if"), testform: Form, thenform: Form, elseform: Form) => Conditional(testform, thenform, Some(elseform)).eval(env)
