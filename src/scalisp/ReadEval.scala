@@ -323,8 +323,8 @@ empty = " "
 */
 
 class LispParser extends RegexParsers {
-  def form: Parser[Form] = atomic_symbol | list | quoted_form | self_evaluating_object
-  def unquote_legal_form: Parser[Form] = atomic_symbol | unquote_legal_list | unquoted_form | unquote_legal_quoted_form | self_evaluating_object
+  def form: Parser[Form] = self_evaluating_object | atomic_symbol | list | quoted_form
+  def unquote_legal_form: Parser[Form] = self_evaluating_object | atomic_symbol | unquote_legal_list | unquoted_form | unquote_legal_quoted_form
   def unquoted_form: Parser[Form] = "," ~ unquote_legal_form ^^ {case _ ~ f => UnquotedForm(f)}
   def list: Parser[Form] = "(" ~ rep(form) ~ ")" ^^ { case _ ~ exps ~ _ => LispList(exps) }
   def unquote_legal_list: Parser[Form] = "(" ~ rep(unquote_legal_form) ~ ")" ^^ { case _ ~ exps ~ _ => LispList(exps) }
@@ -333,7 +333,7 @@ class LispParser extends RegexParsers {
   def backquoted_form: Parser[Form] = "`" ~ unquote_legal_form ^^ {case _ ~ f => BackquotedForm(f)}
   def unquote_legal_quoted_form:Parser[Form] = "'" ~ unquote_legal_form ^^ {case _ ~ f => QuotedForm(f)} | backquoted_form
   def self_evaluating_object: Parser[Form] = integer
-  def integer: Parser[Form] = "[0-9]+".r ^^ {num => LispInteger(Integer.valueOf(num))}
+  def integer: Parser[Form] = "-?[0-9]+".r ^^ {num => LispInteger(Integer.valueOf(num))}
 }
 
 object ScaLisp {
