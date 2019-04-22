@@ -51,7 +51,13 @@ abstract class Form {
 case class QuotedForm(form: Form) extends Form {
   override def toString() = form.toString()
   // Quotes forms evaluate to themselves.
-  override def eval(env:Environment): Form = form
+  override def eval(env:Environment): Form = {
+    form match {
+      // The CLHS doesn't list this as a special case, but I'm not sure how it's handled otherwise.
+      case LispList(forms :List[Form]) if forms.size == 0 => Symbol("nil")
+      case _ => form
+    }
+  }
 }
 case class BackquotedForm(form: Form) extends Form {
   override def toString() = "`" + form.toString()
