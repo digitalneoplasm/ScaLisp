@@ -138,6 +138,8 @@ case class LispList(args: List[Form]) extends Form {
         val evalcdr = cdr.eval(env)
         evalcdr match {
           case LispList(cdrlist) => LispList(evalcar :: cdrlist)
+          case Symbol("nil") => LispList(List(evalcar))
+          // Todo: This needs to go away when we add dotted cons.
           case _ => throw new Exception("cons requires a form and list.")
         }
       }
