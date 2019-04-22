@@ -150,6 +150,25 @@ case class LispList(args: List[Form]) extends Form {
         operands.map(o => o.eval(env)).asInstanceOf[List[LispInteger]].reduce((a,b) => a / b)
       }
 
+      // Logic operations
+      // These likely could be implemented as macros, but let's leave them here for now.
+      // I'm sure there's also a more appropriate Scala way to do it too!
+      case Symbol("or") :: operands => {
+        for ( o:Form <- operands ) {
+          val e = o.eval(env)
+          if (!Utilities.isNil(e)) return e
+        }
+        Symbol("nil")
+      }
+      case Symbol("and") :: operands => {
+        var e:Form = Symbol("t")
+        for ( o:Form <- operands ) {
+          e = o.eval(env)
+          if (Utilities.isNil(e)) return Symbol("nil")
+        }
+        e
+      }
+
       case List(Symbol("quote"), f:Form) => f
 
       case List(Symbol("if"), testform: Form, thenform: Form, elseform: Form) => Conditional(testform, thenform, Some(elseform)).eval(env)
