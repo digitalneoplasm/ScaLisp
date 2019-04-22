@@ -97,6 +97,11 @@ case class LispInteger(value: Integer) extends Form {
   def /(other: LispInteger) = LispInteger(value / other.value)
 }
 case class LispList(args: List[Form]) extends Form {
+  def tail(): Form = args match {
+    case forms:List[Form] if forms.size <= 1 => Symbol("nil")
+    case _ => LispList(args.tail)
+  }
+
   override def toString() = "(" + args.mkString(" ") + ")"
   override def eval(env:Environment): Form = {
     args match {
@@ -123,13 +128,15 @@ case class LispList(args: List[Form]) extends Form {
         val evaled = f.eval(env)
         evaled match {
           case LispList(l) => l.head
+          case Symbol("nil") => Symbol("nil")
           case _ => throw new Exception("car is defined only for lists.")
         }
       }
       case List(Symbol("cdr"), f:Form) => {
         val evaled = f.eval(env)
         evaled match {
-          case LispList(l) => LispList(l.tail)
+          case ll:LispList => ll.tail
+          case Symbol("nil") => Symbol("nil")
           case _ => throw new Exception("cdr is defined only for lists.")
         }
       }
