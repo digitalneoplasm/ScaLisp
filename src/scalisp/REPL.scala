@@ -10,10 +10,12 @@ object REPL {
     while(true) {
       // Read
       try {
-        val input = replReadString(linectr)
-        val readForm: Form = lp.parseAll(lp.form, input).get
-        val evaledForm: Form = readForm.eval(rootEnv)
-        print(evaledForm + "\n")
+        val inputForms = replReadString(linectr)
+        val readForms: List[Form] = inputForms.map(i => lp.parseAll(lp.form, i).get)
+        for (readForm: Form <- readForms){
+          val evaledForm: Form = readForm.eval(rootEnv)
+          print(evaledForm + "\n")
+        }
       }
       catch {
         // TODO: Refine exceptions.
@@ -23,7 +25,8 @@ object REPL {
     }
   }
 
-  def replReadString(linectr: Int): String = {
+  def replReadString(linectr: Int): List[String] = {
+    var forms: List[String] = List()
     var form = ""
     var count = 0
     var input = scala.io.StdIn.readLine(s"[$linectr]> ")
@@ -35,14 +38,20 @@ object REPL {
         }
         else if (c == ')') {
           count -= 1
-          if (count == 0) return form
+          if (count == 0) {
+            forms = forms :+ form
+            form = ""
+          }
         }
       }
-      if (count == 0) return form
+      if (count == 0){
+        if (form != "") forms = forms :+ form
+        return forms
+      }
       form += ' '
       input = scala.io.StdIn.readLine(s"      ")
     }
-    return ""
+    return List()
   }
 
   def main(args: Array[String]){
