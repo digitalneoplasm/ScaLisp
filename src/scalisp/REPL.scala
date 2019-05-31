@@ -31,21 +31,25 @@ object REPL {
     var count = 0
     var input = scala.io.StdIn.readLine(s"[$linectr]> ")
     while(true) {
+      var comment = false
       for (c: Char <- input) {
-        form += c
-        if (c == '(') {
-          count += 1
-        }
-        else if (c == ')') {
-          count -= 1
-          if (count == 0) {
-            forms = forms :+ form
-            form = ""
+        if (c == ';') comment = true
+        if (!comment) {
+          form += c
+          if (c == '(') {
+            count += 1
+          }
+          else if (c == ')') {
+            count -= 1
+            if (count == 0) {
+              forms = forms :+ form
+              form = ""
+            }
           }
         }
       }
       if (count == 0){
-        if (form != "") forms = forms :+ form
+        if (form.trim() != "") forms = forms :+ form
         return forms
       }
       form += ' '
