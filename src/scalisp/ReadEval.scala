@@ -369,11 +369,3 @@ class LispParser extends RegexParsers {
   def self_evaluating_object: Parser[Form] = integer
   def integer: Parser[Form] = "-?[0-9]+".r ^^ {num => LispInteger(Integer.valueOf(num))}
 }
-
-object ScaLisp {
-  def main(args: Array[String]) {
-    val lp = new LispParser()
-    val exp2c: Form = lp.parseAll(lp.form, "(+ 1 2)").get
-    println(exp2c)
-  }
-}
